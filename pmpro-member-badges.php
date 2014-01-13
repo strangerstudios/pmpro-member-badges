@@ -3,7 +3,7 @@
 Plugin Name: PMPro Member Badges
 Plugin URI: http://www.paidmembershipspro.com/pmpro-member-badges/
 Description: Helper plugin for adding member icon/badges next to username for members.
-Version: .1
+Version: .2
 Author: Stranger Studios
 Author URI: http://www.strangerstudios.com
 */
@@ -18,9 +18,18 @@ Author URI: http://www.strangerstudios.com
 	
 	You'll also want to apply styles to img.pmpro_member_badges to style the icons how you want.
 */
-function pmpromb_show_badge($user_id, $echo = true)
+function pmpromb_show_badge($user_id = NULL, $echo = true)
 {
-	if(pmpro_hasMembershipLevel())
+	if(empty($user_id))
+	{
+		global $current_user;
+		$user_id = $current_user->ID;
+	}
+	
+	if(empty($user_id))
+		return false;
+	
+	if(pmpro_hasMembershipLevel(NULL, $user_id))
 	{
 		$image = plugins_url("images/member_gold.png", __FILE__);
 		$alt = "member";
