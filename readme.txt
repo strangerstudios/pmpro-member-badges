@@ -3,7 +3,7 @@ Contributors: strangerstudios
 Tags: paid memberships pro, pmpro, badges, badge, users, members
 Requires at least: 3.5
 Tested up to: 4.5.2
-Stable tag: .3
+Stable tag: .3.1
 
 Assign unique member badges (images) to each membership level and display via a shortcode or template PHP function.
 
@@ -30,6 +30,10 @@ Please post it in the issues section of GitHub and we'll fix it as soon as we ca
 Please visit our premium support site at http://www.paidmembershipspro.com for more documentation and our support forums.
 
 == Changelog ==
+= .3.1 =
+* BUG: Using a different method to get the image from the upload media popover that should hopefully work more consistently.
+* ENHANCEMENT: Showing the text box for the image URL in case you want to edit it manually or at least verify it changed.
+
 = .3 =
 * FEATURE: Added badge upload to edit membership level page.
 * FEATURE: Added [pmpro_member_badge] shortcode.

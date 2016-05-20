@@ -3,7 +3,7 @@
 Plugin Name: Paid Memberships Pro - Member Badges Add On
 Plugin URI: http://www.paidmembershipspro.com/pmpro-member-badges/
 Description: Assign unique member badges (images) to each membership level and display via a shortcode or template PHP function.
-Version: .3
+Version: .3.1
 Author: Stranger Studios
 Author URI: http://www.strangerstudios.com
 */
@@ -146,8 +146,9 @@ function pmpromb_pmpro_membership_level_after_other_settings()
 						$member_badge_url = pmpromb_getBadgeForLevel($level_id);
 					?>
 					<img id="member_badge_preview" class="member-badge-preview" src="<?php echo esc_url($member_badge_url);?>">
-					<input type="hidden" name="member_badge" id="member_badge" value="<?php echo esc_url($member_badge_url);?>" class="regular-text" />
+					<input type="text" name="member_badge" id="member_badge" value="<?php echo esc_url($member_badge_url);?>" class="regular-text" />
 					<input type='button' class="button-primary" value="<?php _e('Upload/Choose Image', 'pmpromb');?>" id="upload_member_badge"/><br />
+					<p><small><?php _e('Enter the URL to the image above or use the Upload/Choose button to upload or choose an image from your media library.', 'pmpromb');?></small></p>
 					<div id="member_badge_notice" class="notice notice-warning inline" style="display: none;">
 						<p><?php _e('Click "Save Level" below to save this change.', 'pmpromb');?></p>
 					</div>
@@ -163,9 +164,18 @@ function pmpromb_pmpro_membership_level_after_other_settings()
 		$( '#upload_member_badge' ).on( 'click', function() {
 			tb_show('<?php echo __('Upload/Choose Member Badge', 'pmpromb');?>', 'media-upload.php?type=image&TB_iframe=1');
 
+			var ghtml;
+
 			window.send_to_editor = function( html ) 
 			{
-				imgurl = $( 'img',html ).attr( 'src' );
+				var regex = /<img.*?src="(.*?)"/;				
+				var match = regex.exec(html);
+				var imgurl;
+				if(match.length > 0)
+					imgurl = match[1];
+				else
+					imgurl = '';
+				
 				$( '#member_badge' ).val(imgurl);
 				$( '#member_badge_preview' ).attr('src', imgurl);
 				$( '#member_badge_notice' ).show();
