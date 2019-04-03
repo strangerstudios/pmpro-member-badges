@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Paid Memberships Pro - Member Badges Add On
-Plugin URI: http://www.paidmembershipspro.com/pmpro-member-badges/
+Plugin URI: https://www.paidmembershipspro.com/add-ons/member-badges/
 Description: Assign unique member badges (images) to each membership level and display via a shortcode or template PHP function.
 Version: .3.1
 Author: Stranger Studios
