@@ -3,15 +3,15 @@
 Plugin Name: Paid Memberships Pro - Member Badges Add On
 Plugin URI: https://www.paidmembershipspro.com/add-ons/member-badges/
 Description: Assign unique member badges (images) to each membership level and display via a shortcode or template PHP function.
-Version: .3.1
+Version: .4
 Author: Stranger Studios
 Author URI: http://www.strangerstudios.com
 */
 
 /*
-	To display a member badge in a PHP file, set the $user_id var and add the code:	
+	To display a member badge in a PHP file, set the $user_id var and add the code:
 		if(function_exists("pmpromb_show_badge")) pmpromb_show_badge($user_id);
-	
+
 	You can add custom style using the class: img.pmpro_member_badges.
 */
 function pmpromb_show_badge($user_id = NULL, $echo = true)
@@ -21,30 +21,36 @@ function pmpromb_show_badge($user_id = NULL, $echo = true)
 		global $current_user;
 		$user_id = $current_user->ID;
 	}
-	
+
 	if(empty($user_id))
 		return false;
-	
+
 	if(pmpro_hasMembershipLevel(NULL, $user_id))
 	{
-		$level = pmpro_getMembershipLevelForUser($user_id);
-		$image = pmpromb_getBadgeForLevel($level->id);
-		$alt = $level->name . __(" Member", "pmpromb");
+		$badges = array();
+		$levels = pmpro_getMembershipLevelsForUser($user_id);
+		foreach($levels as $level) {
+			$badges[] = array(
+				'image' => pmpromb_getBadgeForLevel($level->id),
+				'alt' => $alt = $level->name . __(" Member", "pmpromb")
+			);
+		}
 	}
 	else
 	{
-		$image = apply_filters('pmpromb_non_member_badge', '', $user_id);
+		$badges = apply_filters('pmpromb_non_member_badge', '', $user_id);
 		$alt = __("Non-member", "pmpromb");
 	}
-	
-	if(!empty($image))
-		$r = '<img class="pmpro_member_badge" src="' . esc_url($image) . '" border="0" alt="' . $alt . '" />';
-	else
-		$r = '';
-	
+
+	$r = '';
+
+	foreach($badges as $badge) {
+		$r .= '<img class="pmpro_member_badge" src="' . esc_url($badge['image']) . '" border="0" alt="' . $badge['alt'] . '" />';
+	}
+
 	if($echo)
 		echo $r;
-		
+
 	return $r;
 }
 
@@ -57,23 +63,23 @@ function pmpromb_shortcode($atts, $content=null, $code="")
 	// $content ::= text within enclosing form of shortcode element
 	// $code    ::= the shortcode found, when == callback name
 	// examples: [pmpro_member_badges image_align="none" title="My Member Badges"]
-	
+
 	extract(shortcode_atts(array(
 		'image_align' => NULL,
 		'title' => NULL,
 	), $atts));
-	
+
 	if(empty($user_id))
 	{
 		global $current_user;
 		$user_id = $current_user->ID;
 	}
-	
+
 	if($image_align === "0" || $image_align === "false" || $image_align === "no")
 		$image_align = false;
 	else
 		$image_align = $image_align;
-	
+
 	ob_start();
 	?>
 		<?php if(!empty($title)) { ?>
@@ -124,7 +130,7 @@ function pmpromb_getBadgeForLevel($level_id = NULL) {
 	Settings
 */
 function pmpromb_pmpro_membership_level_after_other_settings()
-{	
+{
 ?>
 <style type="text/css">
 	.member-badge-preview {
@@ -156,7 +162,7 @@ function pmpromb_pmpro_membership_level_after_other_settings()
 				</td>
 			</tr>
 		</td>
-	</tr> 
+	</tr>
 </tbody>
 </table>
 <script type="text/javascript">
