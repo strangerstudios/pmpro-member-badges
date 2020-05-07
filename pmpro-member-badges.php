@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Paid Memberships Pro - Member Badges Add On
-Plugin URI: http://www.paidmembershipspro.com/pmpro-member-badges/
+Plugin URI: https://www.paidmembershipspro.com/add-ons/member-badges/
 Description: Assign unique member badges (images) to each membership level and display via a shortcode or template PHP function.
 Version: .4
 Author: Stranger Studios
@@ -166,31 +166,35 @@ function pmpromb_pmpro_membership_level_after_other_settings()
 </tbody>
 </table>
 <script type="text/javascript">
-	(function( $ ) {
-		$( '#upload_member_badge' ).on( 'click', function() {
-			tb_show('<?php echo __('Upload/Choose Member Badge', 'pmpromb');?>', 'media-upload.php?type=image&TB_iframe=1');
+	jQuery(function($){
+	/*
+	 * Select/Upload image(s) event
+	 * Reference from https://rudrastyh.com/wordpress/customizable-media-uploader.html
+	 */
+	jQuery('body').on('click', '#upload_member_badge', function(e){
+		e.preventDefault();
+ 
+    		var button = $(this),
+    		
+    		custom_uploader = wp.media({
+			title: 'Insert image',
+			library : {
+				type : 'image'
+			},
+			button: {
+				text: 'Use this image' // button label text
+			},
+			multiple: false // for multiple image selection set to true
+		}).on('select', function() { // once image is selected.
+			var attachment = custom_uploader.state().get('selection').first().toJSON();
 
-			var ghtml;
-
-			window.send_to_editor = function( html )
-			{
-				var regex = /<img.*?src="(.*?)"/;
-				var match = regex.exec(html);
-				var imgurl;
-				if(match.length > 0)
-					imgurl = match[1];
-				else
-					imgurl = '';
-
-				$( '#member_badge' ).val(imgurl);
-				$( '#member_badge_preview' ).attr('src', imgurl);
-				$( '#member_badge_notice' ).show();
-				tb_remove();
-			}
-
-			return false;
-		});
-	})(jQuery);
+			jQuery('#member_badge_preview').attr( 'src', attachment.url );
+			jQuery('#member_badge').val( attachment.url );
+			jQuery( '#member_badge_notice' ).show();
+		})
+		.open();
+	}); 
+});
 </script>
 <?php
 }
