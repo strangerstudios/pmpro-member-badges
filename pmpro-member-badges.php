@@ -3,9 +3,9 @@
 Plugin Name: Paid Memberships Pro - Member Badges Add On
 Plugin URI: https://www.paidmembershipspro.com/add-ons/member-badges/
 Description: Assign unique member badges (images) to each membership level and display via a shortcode or template PHP function.
-Version: .4
-Author: Stranger Studios
-Author URI: http://www.strangerstudios.com
+Version: 1.0
+Author: Paid Memberships Pro
+Author URI: https://www.paidmembershipspro.com
 */
 
 /*
@@ -217,8 +217,8 @@ function pmpromb_plugin_row_meta($links, $file) {
 	if(strpos($file, 'pmpro-member-badges.php') !== false)
 	{
 		$new_links = array(
-			'<a href="' . esc_url('http://www.paidmembershipspro.com/add-ons/plus-add-ons/member-badges/')  . '" title="' . esc_attr( __( 'View Documentation', 'pmpro' ) ) . '">' . __( 'Docs', 'pmpro' ) . '</a>',
-			'<a href="' . esc_url('http://paidmembershipspro.com/support/') . '" title="' . esc_attr( __( 'Visit Customer Support Forum', 'pmpro' ) ) . '">' . __( 'Support', 'pmpro' ) . '</a>',
+			'<a href="' . esc_url('https://www.paidmembershipspro.com/add-ons/member-badges/')  . '" title="' . esc_attr( __( 'View Documentation', 'pmpro' ) ) . '">' . __( 'Docs', 'pmpro' ) . '</a>',
+			'<a href="' . esc_url('https://www.paidmembershipspro.com/support/') . '" title="' . esc_attr( __( 'Visit Customer Support Forum', 'pmpro' ) ) . '">' . __( 'Support', 'pmpro' ) . '</a>',
 		);
 		$links = array_merge($links, $new_links);
 	}
