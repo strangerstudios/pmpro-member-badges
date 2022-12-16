@@ -42,6 +42,10 @@ function pmpromb_show_badge($user_id = NULL, $echo = true)
 		$alt = __("Non-member", "pmpromb");
 	}
 
+	if ( empty( $badges ) ) {
+		return;
+	}
+
 	$r = '';
 
 	foreach($badges as $badge) {
