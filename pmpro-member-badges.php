@@ -84,7 +84,7 @@ function pmpromb_shortcode($atts, $content=null, $code="")
 	?>
 		<?php if(!empty($title)) { ?>
 			<div id="pmpro_member_badges" class="pmpro_box">
-				<h3><?php echo $title; ?></h3>
+				<h2><?php echo $title; ?></h2>
 		<?php } ?>
 			<div class="pmpro_member_badge<?php if(!empty($image_align)) echo ' ' . $image_align; ?>">
 				<?php pmpromb_show_badge($user_id); ?>
