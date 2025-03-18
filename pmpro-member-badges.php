@@ -225,3 +225,55 @@ function pmpromb_plugin_row_meta($links, $file) {
 	return $links;
 }
 add_filter('plugin_row_meta', 'pmpromb_plugin_row_meta', 10, 2);
+
+/**
+ * Display the badge in the member directory.
+ *
+ * @since TBD
+ *
+ * @param string $value The value of the element.
+ * @param string $element The element being displayed.
+ * @param WP_User $user The WP_User object.
+ * @param array $levels The membership levels.
+ *
+ * @return string The value of the element.
+ */
+function pmpromb_get_badge_display_value( $value, $element, $user, $levels ) {
+	//Bail if the element is not 'pmpro_member_badge'.
+	if ( 'pmpro_member_badge' !== $element ) {
+		return $value;
+	}
+	// Only process if we have a valid user ID
+	if ( empty( $user->ID ) ) {
+		return $value;
+	}
+	$all_levels_to_display = pmpro_getMembershipLevelsForUser( $user->ID );
+
+	//Filter levels if $levels is set and not 'all'.
+	if ( ! empty( $levels ) && $levels !== 'all' ) {
+		$levels = explode( ',', $levels );
+		$all_levels_to_display = array_filter( $all_levels_to_display, fn( $level ) => in_array( $level->id, $levels ) );
+	}
+
+	if ( empty( $all_levels_to_display ) ) {
+		return $value;
+	}
+
+	$badges_html = '';
+	// Loop through all levels and display all badges.
+	foreach ( $all_levels_to_display as $level ) {
+		$badge_url = pmpromb_getBadgeForLevel( $level->id );
+
+		if ( ! empty( $badge_url ) ) {
+			$badges_html .= '<img class="pmpro_member_badge" src="' . esc_url( $badge_url ) . '" border="0" alt="'
+				. esc_attr( $level->name ) . ' Member" />';
+		}
+	}
+
+	if ( ! empty( $badges_html ) ) {
+		return $badges_html;
+	}
+
+	return '';
+}
+add_filter( 'pmpromd_get_display_value', 'pmpromb_get_badge_display_value', 10, 4 );
