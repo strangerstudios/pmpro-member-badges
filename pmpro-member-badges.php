@@ -3,13 +3,22 @@
  * Plugin Name: Paid Memberships Pro - Member Badges
  * Plugin URI: https://www.paidmembershipspro.com/add-ons/member-badges/
  * Description: Assign unique member badges (images) to each membership level and display via a shortcode or template PHP function.
- * Version: 1.0
+ * Version: 1.1
  * Author: Paid Memberships Pro
  * Author URI: https://www.paidmembershipspro.com
  * Text Domain: pmpro-member-badges
  * Domain Path: /languages
  * License: GPL-3.0
  */
+
+
+/**
+ * Load the languages folder for translations.
+ */
+function pmpromb_load_textdomain() {
+	load_plugin_textdomain( 'pmpro-member-badges', false, basename( dirname( __FILE__ ) ) . '/languages' );
+}
+add_action( 'plugins_loaded', 'pmpromb_load_textdomain' );
 
 function pmpromb_show_badge( $user_id = NULL, $echo = true, $args = array() ) {
 	if ( empty( $user_id ) ) {
@@ -57,7 +66,7 @@ function pmpromb_show_badge( $user_id = NULL, $echo = true, $args = array() ) {
 	}
 
 	if ( $echo ) {
-		echo $r;
+		echo wp_kses( $r, pmpromb_allowed_html() );
 	}
 
 	return $r;
@@ -111,21 +120,7 @@ function pmpromb_shortcode( $atts, $content = null, $code = '' ) {
 	$element_class = implode( ' ', array_unique( $element_classes ) );
 	?>
 	<div class="<?php echo esc_attr( pmpro_get_element_class( $element_class ) ); ?>">
-		<?php
-		echo wp_kses(
-			$badges,
-			array(
-				'img' => array(
-					'alt'    => array(),
-					'border' => array(),
-					'class'  => array(),
-					'src'    => array(),
-					'width'  => array(),
-					'height' => array(),
-				),
-			)
-		);
-		?>
+		<?php echo wp_kses( $badges, pmpromb_allowed_html() ); ?>
 	</div> <!-- .pmpro_member_badges -->
 
 	<?php if ( ! empty( $title ) ) { ?>
@@ -172,6 +167,33 @@ function pmpromb_getBadgeForLevel( $level_id = null ) {
 }
 
 /**
+ * Function for allowed HTML tags in various templates
+ *
+ * @since 1.0
+ * @return array $allowed_html The allowed HTML to be used for wp_kses escaping.
+ */
+function pmpromb_allowed_html() {
+	$allowed_html = array(
+		'img' => array(
+			'src'    => array(),
+			'alt'    => array(),
+			'border' => array(),
+			'class'  => array(),
+			'width'  => array(),
+			'height' => array(),
+		),
+	);
+
+	/**
+	 * Filters the allowed HTML tags for the Member Badges Add On
+	 *
+	 * @since TBD
+	 * @param array $allowed_html The allowed html elements for the Member Badges escaping where wp_kses is used
+	 */
+	return apply_filters( 'pmpromb_allowed_html', $allowed_html );
+}
+
+/**
  * Settings
  */
 function pmpromb_pmpro_membership_level_after_other_settings() {
@@ -182,7 +204,6 @@ function pmpromb_pmpro_membership_level_after_other_settings() {
 		height: auto;
 		width: 150px;
 	}
-
 </style>
 <table>
 	<tbody class="form-table">
