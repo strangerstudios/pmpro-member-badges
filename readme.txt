@@ -36,9 +36,13 @@ Please visit our premium support site at https://www.paidmembershipspro.com for 
 
 == Changelog ==
 
-= 1.1 - TBD =
-* ENHANCEMENT: Added support for v3.1+ Paid Memberships Pro frontend changes.
+= 1.1 - 2025-03-31 =
+* ENHANCEMENT: Added support for displaying the `pmpro_member_badge` as an element in the Member Directory and Profile Add On.
+* ENHANCEMENT: Added support for v3.1+ Paid Memberships Pro frontend appearance.
 * ENHANCEMENT: Updated the default badge images included in the plugin.
+* ENHANCEMENT: Added localization support.
+* ENHANCEMENT: Added new shortcode attributes: `level_id`, `size`, and `user_id`.
+* ENHANCEMENT: Added filter `pmpromb_allowed_html`.
 * BUG FIX/ENHANCEMENT: Improved headings hierarchy for accessibility.
 * BUG FIX: Fixed a warning when logged in user had no membership levels. 
 
