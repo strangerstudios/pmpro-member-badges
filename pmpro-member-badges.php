@@ -291,6 +291,51 @@ function pmpromb_pmpro_save_membership_level( $level_id ) {
 add_action( 'pmpro_save_membership_level', 'pmpromb_pmpro_save_membership_level' );
 
 /**
+ * Add compatibility for a `pmpro_member_badge` element in the Member Directory.
+ *
+ * @since TBD
+ *
+ * @param string $value The value of the element.
+ * @param string $element The element being displayed.
+ * @param WP_User $user The WP_User object.
+ * @param string|array $levels The membership levels.
+ *
+ * @return string The value of the element.
+ */
+function pmpromb_get_badge_display_value( $value, $element, $user, $levels ) {
+	if ( $element !== 'pmpro_member_badge' || empty( $user->ID ) ) {
+		return $value;
+	}
+
+	$all_levels_to_display = pmpro_getMembershipLevelsForUser( $user->ID );
+
+	// Filter levels if specific ones are passed and not set to 'all'.
+	if ( ! empty( $levels ) && $levels !== 'all' ) {
+		if ( is_string( $levels ) ) {
+			$levels = explode( ',', $levels );
+		}
+		$levels = array_map( 'intval', $levels );
+		$all_levels_to_display = array_filter(
+			$all_levels_to_display,
+			fn( $level ) => in_array( (int) $level->id, $levels, true )
+		);
+	}
+
+	if ( empty( $all_levels_to_display ) ) {
+		return $value;
+	}
+
+	$badges = array();
+	foreach ( $all_levels_to_display as $level ) {
+		$badges[] = pmpromb_show_badge( $user->ID, false, array( 'level_id' => $level->id ) );
+	}
+	$badges = implode( '', $badges );
+
+	return $badges ? wp_kses( $badges, pmpromb_allowed_html() ) : '';
+}
+add_filter( 'pmpromd_get_display_value', 'pmpromb_get_badge_display_value', 10, 4 );
+
+/**
  * Function to add links to the plugin row meta
  */
 function pmpromb_plugin_row_meta( $links, $file ) {
