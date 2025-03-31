@@ -207,7 +207,7 @@ function pmpromb_allowed_html() {
 	/**
 	 * Filters the allowed HTML tags for the Member Badges Add On
 	 *
-	 * @since TBD
+	 * @since 1.1
 	 * @param array $allowed_html The allowed html elements for the Member Badges escaping where wp_kses is used
 	 */
 	return apply_filters( 'pmpromb_allowed_html', $allowed_html );
@@ -293,7 +293,7 @@ add_action( 'pmpro_save_membership_level', 'pmpromb_pmpro_save_membership_level'
 /**
  * Add compatibility for a `pmpro_member_badge` element in the Member Directory.
  *
- * @since TBD
+ * @since 1.1
  *
  * @param string $value The value of the element.
  * @param string $element The element being displayed.
