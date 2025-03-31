@@ -20,14 +20,20 @@ function pmpromb_load_textdomain() {
 }
 add_action( 'plugins_loaded', 'pmpromb_load_textdomain' );
 
-function pmpromb_show_badge( $user_id = NULL, $echo = true, $args = array() ) {
+function pmpromb_show_badge( $user_id = NULL, $echo = true, $args ) {
 	if ( empty( $user_id ) ) {
 		global $current_user;
 		$user_id = $current_user->ID;
 	}
 
+	// If no user ID is set, return false.
 	if ( empty( $user_id ) ) {
 		return false;
+	}
+
+	// If no args are set, set up an empty array.
+	if ( empty( $args ) ) {
+		$args = array();
 	}
 
 	// Set default size if not set in args.
@@ -35,10 +41,18 @@ function pmpromb_show_badge( $user_id = NULL, $echo = true, $args = array() ) {
 		$args['size'] = 200;
 	}
 
+	// Set default level ID if not set in args.
+	$args['level_id'] = empty( $args['level_id'] ) ? 'all' : $args['level_id'];
+
 	$badges = array();
 
 	if ( pmpro_hasMembershipLevel( NULL, $user_id ) ) {
-		$levels = pmpro_getMembershipLevelsForUser( $user_id );
+		if ( $args['level_id'] === 'all' ) {
+			$levels = pmpro_getMembershipLevelsForUser( $user_id );
+		} else {
+			$level  = pmpro_getSpecificMembershipLevelForUser( $user_id, $args['level_id'] );
+			$levels = $level ? array( $level ) : array();
+		}
 		foreach ( $levels as $level ) {
 			$badges[] = array(
 				'image' => pmpromb_getBadgeForLevel( $level->id ),
@@ -78,9 +92,10 @@ function pmpromb_show_badge( $user_id = NULL, $echo = true, $args = array() ) {
 function pmpromb_shortcode( $atts, $content = null, $code = '' ) {
 	// Shortcode attributes.
 	$image_align = isset( $atts['image_align'] ) ? $atts['image_align'] : null;
+	$level_id    = isset( $atts['level_id'] ) ? intval( $atts['level_id'] ) : null;
+	$size        = isset( $atts['size'] ) ? intval( $atts['size'] ) : 200;
 	$title       = isset( $atts['title'] ) ? $atts['title'] : null;
 	$user_id     = isset( $atts['user_id'] ) ? intval( $atts['user_id'] ) : null;
-	$size        = isset( $atts['size'] ) ? intval( $atts['size'] ) : 200;
 
 	if ( empty( $user_id ) ) {
 		global $current_user;
@@ -92,8 +107,13 @@ function pmpromb_shortcode( $atts, $content = null, $code = '' ) {
 		$image_align = false;
 	}
 
+	// Set the level ID to all levels if not set.
+	if ( empty( $level_id ) ) {
+		$level_id = 'all';
+	}
+
 	// Get badge markup.
-	$badges = pmpromb_show_badge( $user_id, false, array( 'size' => $size ) );
+	$badges = pmpromb_show_badge( $user_id, false, array( 'level_id' => $level_id, 'size' => $size ) );
 	if ( empty( $badges ) ) {
 		return '';
 	}
