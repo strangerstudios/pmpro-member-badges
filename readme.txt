@@ -1,9 +1,11 @@
-=== Paid Memberships Pro - Member Badges Add On ===
+=== Paid Memberships Pro - Member Badges ===
 Contributors: strangerstudios
 Tags: paid memberships pro, pmpro, badges, badge, users, members
-Requires at least: 3.5
-Tested up to: 5.4.1
-Stable tag: 1.0
+Requires at least: 5.4
+Tested up to: 6.7
+Stable tag: 1.1
+License: GPLv3
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 Assign unique member badges (images) to each membership level and display via a shortcode or template PHP function.
 
@@ -17,9 +19,6 @@ This is an official Add On for [Paid Memberships Pro](https://www.paidmembership
 
 == Installation ==
 
-This plugin works with and without Paid Memberships Pro installed.
-
-= Download, Install and Activate! =
 1. Upload the `pmpro-member-badges` directory to the `/wp-content/plugins/` directory of your site.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Edit your membership levels to upload badges images.
@@ -33,9 +32,15 @@ Please post it in the issues section of GitHub and we'll fix it as soon as we ca
 
 = I need help installing, configuring, or customizing the plugin. =
 
-Please visit our premium support site at http://www.paidmembershipspro.com for more documentation and our support forums.
+Please visit our premium support site at https://www.paidmembershipspro.com for more documentation and our support forums.
 
 == Changelog ==
+
+= 1.1 - TBD =
+* ENHANCEMENT: Added support for v3.1+ Paid Memberships Pro frontend changes.
+* ENHANCEMENT: Updated the default badge images included in the plugin.
+* BUG FIX/ENHANCEMENT: Improved headings hierarchy for accessibility.
+* BUG FIX: Fixed a warning when logged in user had no membership levels. 
 
 = 1.0 - 2020-05-08 =
 * ENHANCEMENT: Added support for multiple memberships per user.

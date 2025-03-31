@@ -1,136 +1,222 @@
 <?php
-/*
-Plugin Name: Paid Memberships Pro - Member Badges Add On
-Plugin URI: https://www.paidmembershipspro.com/add-ons/member-badges/
-Description: Assign unique member badges (images) to each membership level and display via a shortcode or template PHP function.
-Version: 1.0
-Author: Paid Memberships Pro
-Author URI: https://www.paidmembershipspro.com
-*/
+/**
+ * Plugin Name: Paid Memberships Pro - Member Badges
+ * Plugin URI: https://www.paidmembershipspro.com/add-ons/member-badges/
+ * Description: Assign unique member badges (images) to each membership level and display via a shortcode or template PHP function.
+ * Version: 1.1
+ * Author: Paid Memberships Pro
+ * Author URI: https://www.paidmembershipspro.com
+ * Text Domain: pmpro-member-badges
+ * Domain Path: /languages
+ * License: GPL-3.0
+ */
 
-/*
-	To display a member badge in a PHP file, set the $user_id var and add the code:
-		if(function_exists("pmpromb_show_badge")) pmpromb_show_badge($user_id);
 
-	You can add custom style using the class: img.pmpro_member_badges.
-*/
-function pmpromb_show_badge($user_id = NULL, $echo = true)
-{
-	if(empty($user_id))
-	{
+/**
+ * Load the languages folder for translations.
+ */
+function pmpromb_load_textdomain() {
+	load_plugin_textdomain( 'pmpro-member-badges', false, basename( dirname( __FILE__ ) ) . '/languages' );
+}
+add_action( 'plugins_loaded', 'pmpromb_load_textdomain' );
+
+function pmpromb_show_badge( $user_id = NULL, $echo = true, $args ) {
+	if ( empty( $user_id ) ) {
 		global $current_user;
 		$user_id = $current_user->ID;
 	}
 
-	if(empty($user_id))
+	// If no user ID is set, return false.
+	if ( empty( $user_id ) ) {
 		return false;
+	}
 
-	if(pmpro_hasMembershipLevel(NULL, $user_id))
-	{
-		$badges = array();
-		$levels = pmpro_getMembershipLevelsForUser($user_id);
-		foreach($levels as $level) {
+	// If no args are set, set up an empty array.
+	if ( empty( $args ) ) {
+		$args = array();
+	}
+
+	// Set default size if not set in args.
+	if ( ! isset( $args['size'] ) ) {
+		$args['size'] = 200;
+	}
+
+	// Set default level ID if not set in args.
+	$args['level_id'] = empty( $args['level_id'] ) ? 'all' : $args['level_id'];
+
+	$badges = array();
+
+	if ( pmpro_hasMembershipLevel( NULL, $user_id ) ) {
+		if ( $args['level_id'] === 'all' ) {
+			$levels = pmpro_getMembershipLevelsForUser( $user_id );
+		} else {
+			$level  = pmpro_getSpecificMembershipLevelForUser( $user_id, $args['level_id'] );
+			$levels = $level ? array( $level ) : array();
+		}
+		foreach ( $levels as $level ) {
 			$badges[] = array(
-				'image' => pmpromb_getBadgeForLevel($level->id),
-				'alt' => $alt = $level->name . __(" Member", "pmpromb")
+				'image' => pmpromb_getBadgeForLevel( $level->id ),
+				'alt'   => $level->name . __( ' Member', 'pmpro-member-badges' ),
+			);
+		}
+	} else {
+		$non_member_badge = apply_filters( 'pmpromb_non_member_badge', '', $user_id );
+		if ( ! empty( $non_member_badge ) ) {
+			$badges[] = array(
+				'image' => $non_member_badge,
+				'alt'   => __( 'Non-member', 'pmpro-member-badges' ),
 			);
 		}
 	}
-	else
-	{
-		$badges = apply_filters('pmpromb_non_member_badge', '', $user_id);
-		$alt = __("Non-member", "pmpromb");
+
+	if ( empty( $badges ) ) {
+		return;
 	}
 
 	$r = '';
 
-	foreach($badges as $badge) {
-		$r .= '<img class="pmpro_member_badge" src="' . esc_url($badge['image']) . '" border="0" alt="' . $badge['alt'] . '" />';
+	foreach ( $badges as $badge ) {
+		$r .= '<img class="' . esc_attr( pmpro_get_element_class( 'pmpro_member_badge' ) ) . '" src="' . esc_url( $badge['image'] ) . '" border="0" alt="' . esc_attr( $badge['alt'] ) . '" width="' . esc_attr( $args['size'] ) . '" height="' . esc_attr( $args['size'] ) . '" />';
 	}
 
-	if($echo)
-		echo $r;
+	if ( $echo ) {
+		echo wp_kses( $r, pmpromb_allowed_html() );
+	}
 
 	return $r;
 }
 
-/*
-	Shortcode to display a member badge in a page/post/widget: [pmpro_member_badges]
-*/
-function pmpromb_shortcode($atts, $content=null, $code="")
-{
-	// $atts    ::= array of attributes
-	// $content ::= text within enclosing form of shortcode element
-	// $code    ::= the shortcode found, when == callback name
-	// examples: [pmpro_member_badges image_align="none" title="My Member Badges"]
+/**
+ * Shortcode to display a member badge in a page/post/widget: [pmpro_member_badges]
+ */
+function pmpromb_shortcode( $atts, $content = null, $code = '' ) {
+	// Shortcode attributes.
+	$image_align = isset( $atts['image_align'] ) ? $atts['image_align'] : null;
+	$level_id    = isset( $atts['level_id'] ) ? intval( $atts['level_id'] ) : null;
+	$size        = isset( $atts['size'] ) ? intval( $atts['size'] ) : 200;
+	$title       = isset( $atts['title'] ) ? $atts['title'] : null;
+	$user_id     = isset( $atts['user_id'] ) ? intval( $atts['user_id'] ) : null;
 
-	extract(shortcode_atts(array(
-		'image_align' => NULL,
-		'title' => NULL,
-	), $atts));
-
-	if(empty($user_id))
-	{
+	if ( empty( $user_id ) ) {
 		global $current_user;
 		$user_id = $current_user->ID;
 	}
 
-	if($image_align === "0" || $image_align === "false" || $image_align === "no")
+	// Normalize image alignment.
+	if ( in_array( strtolower( $image_align ), array( '0', 'false', 'no' ), true ) ) {
 		$image_align = false;
-	else
-		$image_align = $image_align;
+	}
 
+	// Set the level ID to all levels if not set.
+	if ( empty( $level_id ) ) {
+		$level_id = 'all';
+	}
+
+	// Get badge markup.
+	$badges = pmpromb_show_badge( $user_id, false, array( 'level_id' => $level_id, 'size' => $size ) );
+	if ( empty( $badges ) ) {
+		return '';
+	}
+
+	// Start output buffering.
 	ob_start();
+
+	if ( ! empty( $title ) ) {
+		?>
+		<div class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro' ) ); ?>">
+			<div class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_card' ) ); ?>">
+				<h2 class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_card_title pmpro_font-large' ) ); ?>">
+					<?php echo esc_html( $title ); ?>
+				</h2>
+				<div class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_card_content' ) ); ?>">
+		<?php
+	}
+
+	$element_classes = array( 'pmpro_member_badges' );
+	if ( ! empty( $image_align ) && $image_align !== 'none' ) {
+		$element_classes[] = $image_align;
+	}
+
+	$element_class = implode( ' ', array_unique( $element_classes ) );
 	?>
-		<?php if(!empty($title)) { ?>
-			<div id="pmpro_member_badges" class="pmpro_box">
-				<h3><?php echo $title; ?></h3>
-		<?php } ?>
-			<div class="pmpro_member_badge<?php if(!empty($image_align)) echo ' ' . $image_align; ?>">
-				<?php pmpromb_show_badge($user_id); ?>
-			</div>
-		<?php if(!empty($title)) { ?>
-			</div> <!-- end pmpro_member_badges -->
-		<?php } ?>
-	<?php
-	$temp_content = ob_get_contents();
-	ob_end_clean();
-	return $temp_content;
+	<div class="<?php echo esc_attr( pmpro_get_element_class( $element_class ) ); ?>">
+		<?php echo wp_kses( $badges, pmpromb_allowed_html() ); ?>
+	</div> <!-- .pmpro_member_badges -->
+
+	<?php if ( ! empty( $title ) ) { ?>
+				</div> <!-- .pmpro_card_content -->
+			</div> <!-- .pmpro_card -->
+		</div> <!-- .pmpro -->
+	<?php }
+
+	return ob_get_clean();
 }
-add_shortcode('pmpro_member_badge','pmpromb_shortcode');
-add_shortcode('pmpro_member_badges','pmpromb_shortcode');	//in case typo
+add_shortcode( 'pmpro_member_badge', 'pmpromb_shortcode' );
+add_shortcode( 'pmpro_member_badges', 'pmpromb_shortcode' ); // fallback for typo
 
-/*
-	Function to get a badge URL for level
-*/
-function pmpromb_getBadgeForLevel($level_id = NULL) {
-	if(empty($level_id) && function_exists('pmpro_getMembershipLevelForUser')) {
-		global $current_user;
-		$level = pmpro_getMembershipLevelForUser($current_user->ID);
-		if(!empty($level))
-			$level_id = $level->id;
+/**
+ * Get the badge image URL for a given membership level.
+ *
+ * @param int|null $level_id Membership level ID. If null, attempts to get current user's level.
+ * @return string URL of the badge image.
+ */
+function pmpromb_getBadgeForLevel( $level_id = null ) {
+	// Use current user's level if none is provided.
+	if ( empty( $level_id ) ) {
+		if ( function_exists( 'pmpro_getMembershipLevelForUser' ) ) {
+			$current_user = wp_get_current_user();
+			$level = pmpro_getMembershipLevelForUser( $current_user->ID );
+			if ( ! empty( $level ) && ! empty( $level->id ) ) {
+				$level_id = $level->id;
+			}
+		}
 	}
 
-	//default
-	$default = plugins_url("images/member.jpg", __FILE__);
-
-	//look up by level
-	if(!empty($level_id)) {
-		$url = get_option('pmpro_member_badge_' . $level_id, $default);
+	// Get custom badge URL for this level if set.
+	$url = null;
+	if ( ! empty( $level_id ) ) {
+		$url = get_option( 'pmpro_member_badge_' . $level_id );
 	}
 
-	//use default if level badge is empty
-	if(empty($url))
-		$url = $default;
+	// Fallback to default if no URL set.
+	if ( empty( $url ) ) {
+		$url = plugins_url( 'images/member.png', __FILE__ );
+	}
 
 	return $url;
 }
 
-/*
-	Settings
-*/
-function pmpromb_pmpro_membership_level_after_other_settings()
-{
+/**
+ * Function for allowed HTML tags in various templates
+ *
+ * @since 1.0
+ * @return array $allowed_html The allowed HTML to be used for wp_kses escaping.
+ */
+function pmpromb_allowed_html() {
+	$allowed_html = array(
+		'img' => array(
+			'src'    => array(),
+			'alt'    => array(),
+			'border' => array(),
+			'class'  => array(),
+			'width'  => array(),
+			'height' => array(),
+		),
+	);
+
+	/**
+	 * Filters the allowed HTML tags for the Member Badges Add On
+	 *
+	 * @since TBD
+	 * @param array $allowed_html The allowed html elements for the Member Badges escaping where wp_kses is used
+	 */
+	return apply_filters( 'pmpromb_allowed_html', $allowed_html );
+}
+
+/**
+ * Settings
+ */
+function pmpromb_pmpro_membership_level_after_other_settings() {
 ?>
 <style type="text/css">
 	.member-badge-preview {
@@ -138,32 +224,26 @@ function pmpromb_pmpro_membership_level_after_other_settings()
 		height: auto;
 		width: 150px;
 	}
-
 </style>
 <table>
-<tbody class="form-table">
-	<tr>
-		<td>
-			<tr>
-				<th scope="row" valign="top"><label for="member_badge"><?php _e('Member Badge', 'pmpromb');?>:</label></th>
-				<td>
-					<?php
-						$level_id = intval($_REQUEST['edit']);
-						$member_badge_url = pmpromb_getBadgeForLevel($level_id);
-					?>
-					<img id="member_badge_preview" class="member-badge-preview" src="<?php echo esc_url($member_badge_url);?>">
-					<input type="text" name="member_badge" id="member_badge" value="<?php echo esc_url($member_badge_url);?>" class="regular-text" />
-					<input type='button' class="button-primary" value="<?php _e('Upload/Choose Image', 'pmpromb');?>" id="upload_member_badge"/><br />
-					<p><small><?php _e('Enter the URL to the image above or use the Upload/Choose button to upload or choose an image from your media library.', 'pmpromb');?></small></p>
-					<div id="member_badge_notice" class="notice notice-warning inline" style="display: none;">
-						<p><?php _e('Click "Save Level" below to save this change.', 'pmpromb');?></p>
-					</div>
-
-				</td>
-			</tr>
-		</td>
-	</tr>
-</tbody>
+	<tbody class="form-table">
+		<tr>
+			<th scope="row" valign="top"><label for="member_badge"><?php esc_html_e( 'Member Badge', 'pmpro-member-badges' );?></label></th>
+			<td>
+				<?php
+					$level_id = intval($_REQUEST['edit']);
+					$member_badge_url = pmpromb_getBadgeForLevel($level_id);
+				?>
+				<img id="member_badge_preview" class="member-badge-preview" src="<?php echo esc_url($member_badge_url);?>">
+				<input type="text" name="member_badge" id="member_badge" value="<?php echo esc_url($member_badge_url);?>" class="regular-text" />
+				<input type='button' class="button-primary" value="<?php esc_html_e('Upload/Choose Image', 'pmpro-member-badges');?>" id="upload_member_badge"/><br />
+				<p class="description"><?php esc_html_e('Enter the URL to the image above or use the Upload/Choose button to upload or choose an image from your media library.', 'pmpro-member-badges'); ?></p>
+				<div id="member_badge_notice" class="notice notice-warning inline" style="display: none;">
+					<p><?php esc_html_e('Click "Save Level" below to save this change.', 'pmpro-member-badges');?></p>
+				</div>
+			</td>
+		</tr>
+	</tbody>
 </table>
 <script type="text/javascript">
 	jQuery(function($){
@@ -198,82 +278,74 @@ function pmpromb_pmpro_membership_level_after_other_settings()
 </script>
 <?php
 }
-add_action("pmpro_membership_level_after_other_settings", "pmpromb_pmpro_membership_level_after_other_settings");
-
-/*
-	Save the member badge.
-*/
-function pmpromb_pmpro_save_membership_level($level_id)
-{
-	if(isset($_REQUEST['member_badge']))
-		update_option('pmpro_member_badge_' . $level_id, $_REQUEST['member_badge']);
-}
-add_action("pmpro_save_membership_level", "pmpromb_pmpro_save_membership_level");
-
-/*
-	Function to add links to the plugin row meta
-*/
-function pmpromb_plugin_row_meta($links, $file) {
-	if(strpos($file, 'pmpro-member-badges.php') !== false)
-	{
-		$new_links = array(
-			'<a href="' . esc_url('https://www.paidmembershipspro.com/add-ons/member-badges/')  . '" title="' . esc_attr( __( 'View Documentation', 'pmpro' ) ) . '">' . __( 'Docs', 'pmpro' ) . '</a>',
-			'<a href="' . esc_url('https://www.paidmembershipspro.com/support/') . '" title="' . esc_attr( __( 'Visit Customer Support Forum', 'pmpro' ) ) . '">' . __( 'Support', 'pmpro' ) . '</a>',
-		);
-		$links = array_merge($links, $new_links);
-	}
-	return $links;
-}
-add_filter('plugin_row_meta', 'pmpromb_plugin_row_meta', 10, 2);
+add_action( 'pmpro_membership_level_after_other_settings', 'pmpromb_pmpro_membership_level_after_other_settings' );
 
 /**
- * Display the badge in the member directory.
+ * Save the member badge.
+ */
+function pmpromb_pmpro_save_membership_level( $level_id ) {
+	if ( isset( $_REQUEST['member_badge'] ) ) {
+		update_option( 'pmpro_member_badge_' . $level_id, esc_url_raw( $_REQUEST['member_badge'] ) );
+	}
+}
+add_action( 'pmpro_save_membership_level', 'pmpromb_pmpro_save_membership_level' );
+
+/**
+ * Add compatibility for a `pmpro_member_badge` element in the Member Directory.
  *
  * @since TBD
  *
  * @param string $value The value of the element.
  * @param string $element The element being displayed.
  * @param WP_User $user The WP_User object.
- * @param array $levels The membership levels.
+ * @param string|array $levels The membership levels.
  *
  * @return string The value of the element.
  */
 function pmpromb_get_badge_display_value( $value, $element, $user, $levels ) {
-	//Bail if the element is not 'pmpro_member_badge'.
-	if ( 'pmpro_member_badge' !== $element ) {
+	if ( $element !== 'pmpro_member_badge' || empty( $user->ID ) ) {
 		return $value;
 	}
-	// Only process if we have a valid user ID
-	if ( empty( $user->ID ) ) {
-		return $value;
-	}
+
 	$all_levels_to_display = pmpro_getMembershipLevelsForUser( $user->ID );
 
-	//Filter levels if $levels is set and not 'all'.
+	// Filter levels if specific ones are passed and not set to 'all'.
 	if ( ! empty( $levels ) && $levels !== 'all' ) {
-		$levels = explode( ',', $levels );
-		$all_levels_to_display = array_filter( $all_levels_to_display, fn( $level ) => in_array( $level->id, $levels ) );
+		if ( is_string( $levels ) ) {
+			$levels = explode( ',', $levels );
+		}
+		$levels = array_map( 'intval', $levels );
+		$all_levels_to_display = array_filter(
+			$all_levels_to_display,
+			fn( $level ) => in_array( (int) $level->id, $levels, true )
+		);
 	}
 
 	if ( empty( $all_levels_to_display ) ) {
 		return $value;
 	}
 
-	$badges_html = '';
-	// Loop through all levels and display all badges.
+	$badges = array();
 	foreach ( $all_levels_to_display as $level ) {
-		$badge_url = pmpromb_getBadgeForLevel( $level->id );
-
-		if ( ! empty( $badge_url ) ) {
-			$badges_html .= '<img class="pmpro_member_badge" src="' . esc_url( $badge_url ) . '" border="0" alt="'
-				. esc_attr( $level->name ) . ' Member" />';
-		}
+		$badges[] = pmpromb_show_badge( $user->ID, false, array( 'level_id' => $level->id ) );
 	}
+	$badges = implode( '', $badges );
 
-	if ( ! empty( $badges_html ) ) {
-		return $badges_html;
-	}
-
-	return '';
+	return $badges ? wp_kses( $badges, pmpromb_allowed_html() ) : '';
 }
 add_filter( 'pmpromd_get_display_value', 'pmpromb_get_badge_display_value', 10, 4 );
+
+/**
+ * Function to add links to the plugin row meta
+ */
+function pmpromb_plugin_row_meta( $links, $file ) {
+	if ( strpos( $file, 'pmpro-member-badges.php' ) !== false ) {
+		$new_links = array(
+			'<a href="' . esc_url( 'https://www.paidmembershipspro.com/add-ons/member-badges/' ) . '" title="' . esc_attr( __( 'View Documentation', 'pmpro-member-badges' ) ) . '">' . __( 'Docs', 'pmpro-member-badges' ) . '</a>',
+			'<a href="' . esc_url( 'https://www.paidmembershipspro.com/support/' ) . '" title="' . esc_attr( __( 'Visit Customer Support Forum', 'pmpro-member-badges' ) ) . '">' . __( 'Support', 'pmpro-member-badges' ) . '</a>',
+		);
+		$links     = array_merge( $links, $new_links );
+	}
+	return $links;
+}
+add_filter( 'plugin_row_meta', 'pmpromb_plugin_row_meta', 10, 2 );
