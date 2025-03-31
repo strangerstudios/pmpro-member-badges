@@ -1,0 +1,80 @@
+# Copyright (C) 2025 Paid Memberships Pro
+# This file is distributed under the GPL-3.0.
+msgid ""
+msgstr ""
+"Project-Id-Version: Paid Memberships Pro - Member Badges 1.1\n"
+"Report-Msgid-Bugs-To: info@paidmembershipspro.com\n"
+"Last-Translator: Paid Memberships Pro <info@paidmembershipspro.com>\n"
+"Language-Team: Paid Memberships Pro <info@paidmembershipspro.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-03-31T19:53:29+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: pmpro-member-badges\n"
+
+#. Plugin Name of the plugin
+#: pmpro-member-badges.php
+msgid "Paid Memberships Pro - Member Badges"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: pmpro-member-badges.php
+msgid "https://www.paidmembershipspro.com/add-ons/member-badges/"
+msgstr ""
+
+#. Description of the plugin
+#: pmpro-member-badges.php
+msgid "Assign unique member badges (images) to each membership level and display via a shortcode or template PHP function."
+msgstr ""
+
+#. Author of the plugin
+#: pmpro-member-badges.php
+msgid "Paid Memberships Pro"
+msgstr ""
+
+#. Author URI of the plugin
+#: pmpro-member-badges.php
+msgid "https://www.paidmembershipspro.com"
+msgstr ""
+
+#: pmpro-member-badges.php:59
+msgid " Member"
+msgstr ""
+
+#: pmpro-member-badges.php:67
+msgid "Non-member"
+msgstr ""
+
+#: pmpro-member-badges.php:231
+msgid "Member Badge"
+msgstr ""
+
+#: pmpro-member-badges.php:239
+msgid "Upload/Choose Image"
+msgstr ""
+
+#: pmpro-member-badges.php:240
+msgid "Enter the URL to the image above or use the Upload/Choose button to upload or choose an image from your media library."
+msgstr ""
+
+#: pmpro-member-badges.php:242
+msgid "Click \"Save Level\" below to save this change."
+msgstr ""
+
+#: pmpro-member-badges.php:344
+msgid "View Documentation"
+msgstr ""
+
+#: pmpro-member-badges.php:344
+msgid "Docs"
+msgstr ""
+
+#: pmpro-member-badges.php:345
+msgid "Visit Customer Support Forum"
+msgstr ""
+
+#: pmpro-member-badges.php:345
+msgid "Support"
+msgstr ""
