@@ -1,0 +1,5 @@
+# Items to ignore when downloading a zip
+pmpro-member-badges-banner.png export-ignore
+README.md export-ignore
+.gitattributes export-ignore
+.github export-ignore
