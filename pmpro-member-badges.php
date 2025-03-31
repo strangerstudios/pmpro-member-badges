@@ -8,48 +8,49 @@ Author: Paid Memberships Pro
 Author URI: https://www.paidmembershipspro.com
 */
 
-/*
-	To display a member badge in a PHP file, set the $user_id var and add the code:
-		if(function_exists("pmpromb_show_badge")) pmpromb_show_badge($user_id);
-
-	You can add custom style using the class: img.pmpro_member_badges.
-*/
-function pmpromb_show_badge($user_id = NULL, $echo = true)
-{
-	if(empty($user_id))
-	{
+function pmpromb_show_badge( $user_id = NULL, $echo = true ) {
+	if ( empty( $user_id ) ) {
 		global $current_user;
 		$user_id = $current_user->ID;
 	}
 
-	if(empty($user_id))
+	if ( empty( $user_id ) ) {
 		return false;
+	}
 
-	if(pmpro_hasMembershipLevel(NULL, $user_id))
-	{
-		$badges = array();
-		$levels = pmpro_getMembershipLevelsForUser($user_id);
-		foreach($levels as $level) {
+	$badges = array();
+
+	if ( pmpro_hasMembershipLevel( NULL, $user_id ) ) {
+		$levels = pmpro_getMembershipLevelsForUser( $user_id );
+		foreach ( $levels as $level ) {
 			$badges[] = array(
-				'image' => pmpromb_getBadgeForLevel($level->id),
-				'alt' => $alt = $level->name . __(" Member", "pmpromb")
+				'image' => pmpromb_getBadgeForLevel( $level->id ),
+				'alt'   => $level->name . __( ' Member', 'pmpromb' ),
+			);
+		}
+	} else {
+		$non_member_badge = apply_filters( 'pmpromb_non_member_badge', '', $user_id );
+		if ( ! empty( $non_member_badge ) ) {
+			$badges[] = array(
+				'image' => $non_member_badge,
+				'alt'   => __( 'Non-member', 'pmpromb' ),
 			);
 		}
 	}
-	else
-	{
-		$badges = apply_filters('pmpromb_non_member_badge', '', $user_id);
-		$alt = __("Non-member", "pmpromb");
+
+	if ( empty( $badges ) ) {
+		return;
 	}
 
 	$r = '';
 
-	foreach($badges as $badge) {
-		$r .= '<img class="pmpro_member_badge" src="' . esc_url($badge['image']) . '" border="0" alt="' . $badge['alt'] . '" />';
+	foreach ( $badges as $badge ) {
+		$r .= '<img class="pmpro_member_badge" src="' . esc_url( $badge['image'] ) . '" border="0" alt="' . esc_attr( $badge['alt'] ) . '" />';
 	}
 
-	if($echo)
+	if ( $echo ) {
 		echo $r;
+	}
 
 	return $r;
 }
