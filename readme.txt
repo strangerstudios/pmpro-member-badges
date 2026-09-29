@@ -2,8 +2,8 @@
 Contributors: strangerstudios
 Tags: paid memberships pro, pmpro, badges, badge, users, members
 Requires at least: 5.4
-Tested up to: 6.9
-Stable tag: 1.1.1
+Tested up to: 7.1
+Stable tag: 1.1.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -35,6 +35,9 @@ Please post it in the issues section of GitHub and we'll fix it as soon as we ca
 Please visit our premium support site at https://www.paidmembershipspro.com for more documentation and our support forums.
 
 == Changelog ==
+
+= 1.1.2 - 2026-09-29 =
+* SECURITY: Improved sanitization and escaping throughout the plugin to resolve Plugin Check security findings. #21 (@dparker1005)
 
 = 1.1.1 - 2026-05-01 =
 * ENHANCEMENT: Added a section heading and "Learn more about Member Badges" documentation link to the Edit Membership Level settings page. #20 (@kimcoleman)
