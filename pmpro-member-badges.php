@@ -11,6 +11,9 @@
  * License: GPL-3.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Load the languages folder for translations.
@@ -234,7 +237,7 @@ function pmpromb_pmpro_membership_level_after_other_settings() {
 			<th scope="row" valign="top"><label for="member_badge"><?php esc_html_e( 'Member Badge', 'pmpro-member-badges' );?></label></th>
 			<td>
 				<?php
-					$level_id = intval($_REQUEST['edit']);
+					$level_id = isset( $_REQUEST['edit'] ) ? intval( $_REQUEST['edit'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display on the level edit page.
 					$member_badge_url = pmpromb_getBadgeForLevel($level_id);
 				?>
 				<img id="member_badge_preview" class="member-badge-preview" src="<?php echo esc_url($member_badge_url);?>">
@@ -287,9 +290,11 @@ add_action( 'pmpro_membership_level_after_other_settings', 'pmpromb_pmpro_member
  * Save the member badge.
  */
 function pmpromb_pmpro_save_membership_level( $level_id ) {
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Nonce and capability are verified in PMPro core adminpages/membershiplevels.php before this hook fires.
 	if ( isset( $_REQUEST['member_badge'] ) ) {
-		update_option( 'pmpro_member_badge_' . $level_id, esc_url_raw( $_REQUEST['member_badge'] ) );
+		update_option( 'pmpro_member_badge_' . $level_id, esc_url_raw( wp_unslash( $_REQUEST['member_badge'] ) ) );
 	}
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 }
 add_action( 'pmpro_save_membership_level', 'pmpromb_pmpro_save_membership_level' );
 
